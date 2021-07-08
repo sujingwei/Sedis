@@ -1,0 +1,8 @@
+.gitlab-ci.yml
+.settings
+.project
+*.zip
+*.iml
+.idea
+/logs
+/target
