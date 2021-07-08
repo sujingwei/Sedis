@@ -4,5 +4,6 @@
 *.zip
 *.iml
 .idea
+.idea/
 /logs
 /target
