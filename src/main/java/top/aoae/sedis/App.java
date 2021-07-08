@@ -14,8 +14,12 @@ public class App
 
     public static void main( String[] args )
     {
-        MainFrame mainFrame = new MainFrame();
-        mainFrame.setVisible(true);
+        MainFrame f = new MainFrame();
+        f.setVisible(true);
 
+        /**
+         * 启用连接失效恢复功能
+         */
+        f.jedisRestoration();
     }
 }

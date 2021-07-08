@@ -1,6 +1,7 @@
 package top.aoae.sedis.ui;
 
 
+import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.Jedis;
 
 import javax.swing.*;
@@ -29,6 +30,11 @@ public class MainFrame extends JFrame implements ActionListener {
      * jedis对象
      */
     public static Map<String, Jedis> connectMap = new LinkedHashMap<>();
+
+    /**
+     * 用于保存当前连接的信息，便于故障恢复
+     */
+    private static Map<String, String> connectInfoMap = new LinkedHashMap<>();
 
     /**
      * Redis连接窗口
@@ -79,7 +85,6 @@ public class MainFrame extends JFrame implements ActionListener {
                 // 当前选中的标签页
                 int selectedIndex = tabbedPane.getSelectedIndex();
                 if (selectedIndex != -1) {
-                    System.out.println(selectedIndex);
                     tabbedPane.remove(selectedIndex);
                 }
             } else if ("全部断开".equals(txt)) {
@@ -101,8 +106,9 @@ public class MainFrame extends JFrame implements ActionListener {
      * @param name
      * @param jedis
      */
-    public void addTab(String name, Jedis jedis) {
-        connectMap.put(name, jedis);
+    public void addTab(String name, Jedis jedis, String connectInfo) {
+        connectMap.put(name, jedis);            // 保存jedis连接对象
+        connectInfoMap.put(name, connectInfo);  // 保存jedis连接信息
         tabbedPane.addTab(name, new TabPanel(this, name));
     }
 
@@ -111,11 +117,61 @@ public class MainFrame extends JFrame implements ActionListener {
      * 打开Redis连接对话框
      */
     public void openRedisConnectionDialog() {
-        if(connectDialog == null) {
+        if (connectDialog == null) {
             connectDialog = new ConnectDialog(this);
         }
         connectDialog.setVisible(true);
     }
 
+    /**
+     * jedis连接，的故障恢复操作
+     */
+    public void jedisRestoration(){
+        new Thread(){
+            @Override
+            public void run() {
+                while (true) {
+                    if (!connectMap.isEmpty()) {
+                        for (String key : connectMap.keySet()) {
+                            Jedis jedis = connectMap.get(key);
+                            if (jedis == null || !jedis.isConnected()) {
+                                System.out.println(":( -- " + key + " 连接断开 ---------------------------");
+                                if (connectInfoMap.containsKey(key)) {
+                                    String info = connectInfoMap.get(key);
+                                    if(!StringUtils.isEmpty(info)) {
+                                        String[] split = info.split(" ");
+                                        if ("null".equalsIgnoreCase(split[1])) {
+                                            split[1] = "6379";
+                                        }
+                                        jedis = new Jedis(split[0], Integer.valueOf(split[1]), 10000);
+                                        if (!"null".equalsIgnoreCase(split[2])) {
+                                            jedis.auth(split[2]);
+                                        }
+                                        connectMap.put(key, jedis);
+                                        System.out.println(":) -- " + key + " 重建连接 ---------------------------");
+                                    }
+                                }
+                            }
+
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    // System.out.println(":) -- 连接失效恢复线程 ---------------------------");
+                }
+            }
+        }.start();
+
+    }
 
 }

@@ -162,7 +162,12 @@ public class TabPanel extends JPanel implements ActionListener {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    System.out.println(e.getItem().toString());
+                    // System.out.println(e.getItem().toString());
+                    Jedis jedis = getJedis();
+                    if (jedis!=null && jedis.isConnected()) {
+                        jedis.select(Integer.valueOf(e.getItem().toString()));
+                        updateKeyTableData();
+                    }
                 }
             }
         });
@@ -429,7 +434,6 @@ public class TabPanel extends JPanel implements ActionListener {
      */
     private void getContentPanel() {
         JPanel empty = getPanel(null);
-        empty.add(new JLabel("Empty Panel"));
         empty.setMinimumSize(new Dimension(500, 300));
         stringPanel = new StringPanel(frame, name);
         listPanel = new ListPanel(frame, name);

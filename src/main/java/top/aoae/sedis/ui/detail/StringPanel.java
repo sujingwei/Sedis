@@ -94,6 +94,7 @@ public class StringPanel extends JPanel implements ActionListener {
      * 更新数据
      */
     public void updateDate(){
+        formatValue.setText("");
         Jedis jedis = getJedis();
         if (jedis != null && StringUtils.isNotBlank(key)) {
             new Thread(){

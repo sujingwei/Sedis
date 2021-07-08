@@ -96,15 +96,17 @@ public class ConnectDialog extends JDialog implements ActionListener {
                         JOptionPane.showMessageDialog(this, "redis连接失败");
                         return;
                     }
+                    // 登录信息
+                    String loginMsg = String.format("%s %s %s",
+                            host,
+                            StringUtils.isBlank(port) ? "null" : port,
+                            StringUtils.isBlank(pass) ? "null" : pass);
                     if (isSaveJCheckbox.isSelected()) {
                         // 保存登录信息
-                        String loginMsg = String.format("%s %s %s",
-                                host,
-                                StringUtils.isBlank(port) ? "null" : port,
-                                StringUtils.isBlank(pass) ? "null" : pass);
                         writeLoginMessage(name, loginMsg);
                     }
-                    this.frame.addTab(name, jedis);  // 创建 tab窗口
+                    // 创建 tab窗口
+                    this.frame.addTab(name, jedis, loginMsg);
                     this.setVisible(false);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, ex.getMessage());
