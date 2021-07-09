@@ -9,7 +9,7 @@ import java.util.Map;
  * Hello world!
  *
  */
-public class App 
+public class SedisApplication
 {
 
     public static void main( String[] args )

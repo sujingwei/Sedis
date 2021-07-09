@@ -49,7 +49,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>top.aoae.sedis.App</mainClass>
+                            <mainClass>top.aoae.sedis.SedisApplication</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
